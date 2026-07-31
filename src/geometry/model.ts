@@ -75,18 +75,27 @@ export function createLeg(d: DerivedDimensions): JscadGeometry {
   return solid as JscadGeometry
 }
 
+export function retentionHoleYPositions(d: DerivedDimensions): number[] {
+  const halfStandWidth = d.standWidth / 2
+  const holeOffset = d.retentionHoleDiameter / 2 + d.fitClearance
+  const innerHoleY = halfStandWidth - d.legThickness - holeOffset
+  const outerHoleY = halfStandWidth + holeOffset
+
+  return [-outerHoleY, -innerHoleY, innerHoleY, outerHoleY]
+}
+
 export function createBeam(d: DerivedDimensions, chamberId: string): JscadGeometry {
   const profile = d.beamChamberProfiles.find((candidate) => candidate.id === chamberId)!
   const beam = translate(
     [0, d.beamLength / 2, 0],
     rotateX(Math.PI / 2, extrudeLinear({ height: d.beamLength }, profile2d(profile))),
   )
-  const holeY = d.standWidth / 2 + d.endProtrusion / 2
   const hole = (y: number) => translate(
     [profile.centerX, y, profile.centerZ],
     cylinder({ height: profile.maxHeight + 2, radius: d.retentionHoleDiameter / 2, segments: 24 }),
   )
-  return subtract(beam, hole(-holeY), hole(holeY)) as JscadGeometry
+  const retentionHoles = retentionHoleYPositions(d).map(hole)
+  return subtract(beam, ...retentionHoles) as JscadGeometry
 }
 
 export type AssemblyPart = {

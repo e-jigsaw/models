@@ -3,7 +3,7 @@ import stlSerializer from '@jscad/stl-serializer'
 import { describe, expect, it } from 'vitest'
 import { deriveDimensions } from '../domain/derive'
 import { defaultParameters } from '../domain/parameters'
-import { createAssembly, createBeam, createLeg } from '../geometry/model'
+import { createAssembly, createBeam, createLeg, retentionHoleYPositions } from '../geometry/model'
 
 describe('model serialization', () => {
   const dimensions = deriveDimensions(defaultParameters)
@@ -29,5 +29,18 @@ describe('model serialization', () => {
     expect(frontSize).toBeGreaterThan(1_000)
     expect(rearSize).toBeGreaterThan(1_000)
     expect(frontSize).not.toBe(rearSize)
+  })
+
+  it('places retention holes on both sides of each leg', () => {
+    const positions = retentionHoleYPositions(dimensions)
+    const halfStandWidth = dimensions.standWidth / 2
+    const holeOffset = dimensions.retentionHoleDiameter / 2 + dimensions.fitClearance
+
+    expect(positions).toEqual([
+      -halfStandWidth - holeOffset,
+      -halfStandWidth + dimensions.legThickness + holeOffset,
+      halfStandWidth - dimensions.legThickness - holeOffset,
+      halfStandWidth + holeOffset,
+    ])
   })
 })
