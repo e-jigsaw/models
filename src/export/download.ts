@@ -34,21 +34,21 @@ export function downloadStl(geometry: JscadGeometry, filename: string) {
 }
 
 export function downloadLeg(d: DerivedDimensions) {
-  downloadStl(createLeg(d), 'flex-stand-leg.stl')
+  downloadStl(createLeg(d), 'instrument-stand-leg.stl')
 }
 
 export function downloadFrontBeam(d: DerivedDimensions) {
-  downloadStl(createBeam(d, d.frontBeamChamber), 'flex-stand-front-beam.stl')
+  downloadStl(createBeam(d, d.frontBeamChamber), 'instrument-stand-front-beam.stl')
 }
 
 export function downloadRearBeam(d: DerivedDimensions) {
-  downloadStl(createBeam(d, d.rearBeamChamber), 'flex-stand-rear-beam.stl')
+  downloadStl(createBeam(d, d.rearBeamChamber), 'instrument-stand-rear-beam.stl')
 }
 
 export function downloadAssembly3mf(d: DerivedDimensions) {
   const geometries = createAssembly(d).map((part) => part.geometry)
   const data = threeMfSerializer.serialize({ unit: 'millimeter', compress: true }, ...geometries) as BlobPart[]
-  download(data, 'model/3mf', 'flex-stand.3mf')
+  download(data, 'model/3mf', 'instrument-stand.3mf')
 }
 
 function moveToOrigin(geometry: JscadGeometry): JscadGeometry {
