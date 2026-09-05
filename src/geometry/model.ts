@@ -1,7 +1,8 @@
 import { booleans, extrusions, hulls, primitives, transforms } from '@jscad/modeling'
 import type { BeamChamberProfile, DerivedDimensions } from '../domain/derive'
+import type { AssemblyPart, JscadGeometry } from './types'
 
-export type JscadGeometry = ReturnType<typeof primitives.cuboid>
+export type { AssemblyPart, JscadGeometry } from './types'
 
 const { circle, cylinder, polygon, rectangle } = primitives
 const { hull } = hulls
@@ -96,13 +97,6 @@ export function createBeam(d: DerivedDimensions, chamberId: string): JscadGeomet
   )
   const retentionHoles = retentionHoleYPositions(d).map(hole)
   return subtract(beam, ...retentionHoles) as JscadGeometry
-}
-
-export type AssemblyPart = {
-  id: string
-  color: string
-  geometry: JscadGeometry
-  printable?: boolean
 }
 
 export function createAssembly(d: DerivedDimensions): AssemblyPart[] {
