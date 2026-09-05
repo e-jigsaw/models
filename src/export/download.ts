@@ -1,8 +1,11 @@
 import threeMfSerializer from '@jscad/3mf-serializer'
 import stlSerializer from '@jscad/stl-serializer'
 import { measurements, transforms } from '@jscad/modeling'
+import { createMonitorClip } from '../clip/model'
+import type { ClipParameters } from '../clip/parameters'
 import type { DerivedDimensions } from '../domain/derive'
-import { createAssembly, createBeam, createLeg, type JscadGeometry } from '../geometry/model'
+import { createAssembly, createBeam, createLeg } from '../geometry/model'
+import type { JscadGeometry } from '../geometry/types'
 import type { MicrophoneStandDimensions } from '../microphone/derive'
 import {
   createMicrophoneAssembly,
@@ -71,4 +74,8 @@ export function downloadMicrophoneAssembly3mf(d: MicrophoneStandDimensions) {
     .map((part) => part.geometry)
   const data = threeMfSerializer.serialize({ unit: 'millimeter', compress: true }, ...geometries) as BlobPart[]
   download(data, 'model/3mf', 'videomic-me-c-stand.3mf')
+}
+
+export function downloadMonitorClip(parameters: ClipParameters) {
+  downloadStl(createMonitorClip(parameters), 'lg-49wl95c-stabilizer-clip.stl')
 }

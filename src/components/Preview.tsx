@@ -20,15 +20,16 @@ export function Preview({
   framing = 'instrument',
 }: {
   parts: AssemblyPart[]
-  framing?: 'instrument' | 'microphone'
+  framing?: 'instrument' | 'microphone' | 'clip'
 }) {
   const microphone = framing === 'microphone'
+  const clip = framing === 'clip'
   return (
     <Canvas
       key={framing}
       shadows
       camera={{
-        position: microphone ? [420, 300, 430] : [340, 260, 420],
+        position: microphone ? [420, 300, 430] : clip ? [155, 115, 165] : [340, 260, 420],
         fov: 38,
         near: 0.1,
         far: 3000,
@@ -45,7 +46,7 @@ export function Preview({
         shadow-mapSize-height={2048}
       />
       <Suspense fallback={null}>
-        <group position={microphone ? [0, 0, 0] : [-95, 0, 0]}>
+        <group position={microphone || clip ? [0, 0, 0] : [-95, 0, 0]}>
           {parts.map((part) => <Part key={part.id} part={part} />)}
         </group>
         <ContactShadows position={[0, -0.5, 0]} opacity={0.45} scale={800} blur={2.5} far={400} />
@@ -64,9 +65,9 @@ export function Preview({
       />
       <OrbitControls
         makeDefault
-        target={microphone ? [0, 170, 0] : [20, 45, 0]}
-        minDistance={160}
-        maxDistance={1100}
+        target={microphone ? [0, 170, 0] : clip ? [0, 16, 0] : [20, 45, 0]}
+        minDistance={clip ? 90 : 160}
+        maxDistance={clip ? 500 : 1100}
       />
     </Canvas>
   )

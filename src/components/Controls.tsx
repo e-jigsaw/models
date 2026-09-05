@@ -4,18 +4,18 @@ import type { StandParameters } from '../domain/parameters'
 
 type NumericKey = Exclude<keyof StandParameters, 'mode' | 'frontBeamChamber' | 'rearBeamChamber'>
 
-type NumberControlProps = {
+type NumberControlProps<TName extends string> = {
   label: string
-  name: NumericKey
+  name: TName
   value: number
   min: number
   max: number
   step?: number
   unit?: string
-  onChange: (name: NumericKey, value: number) => void
+  onChange: (name: TName, value: number) => void
 }
 
-function NumberControl({ label, name, value, min, max, step = 1, unit = 'mm', onChange }: NumberControlProps) {
+export function NumberControl<TName extends string>({ label, name, value, min, max, step = 1, unit = 'mm', onChange }: NumberControlProps<TName>) {
   const progress = ((value - min) / (max - min)) * 100
 
   return (

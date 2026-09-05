@@ -1,4 +1,9 @@
 import { useMemo, useState } from 'react'
+import { clipWallBaseThickness, createMonitorClipPreview } from './clip/model'
+import { clipOpening, defaultClipParameters, type ClipParameters } from './clip/parameters'
+import { parseClipSettings, serializeClipSettings } from './clip/preset'
+import { validateClip } from './clip/validate'
+import { ClipControls } from './components/ClipControls'
 import { Controls } from './components/Controls'
 import { MicrophoneControls } from './components/MicrophoneControls'
 import { MicrophoneSettingsPanel } from './components/MicrophoneSettingsPanel'
@@ -15,6 +20,7 @@ import {
   downloadMicrophoneBase,
   downloadMicrophoneHolder,
   downloadMicrophoneMast,
+  downloadMonitorClip,
   downloadRearBeam,
 } from './export/download'
 import { createAssembly } from './geometry/model'
@@ -25,8 +31,9 @@ import {
   type MicrophoneStandParameters,
 } from './microphone/parameters'
 import { validateMicrophoneStand } from './microphone/validate'
+import { parseSettings, serializeSettings } from './settings/preset'
 
-type ProductMode = 'instrument' | 'videomic-me-c'
+type ProductMode = 'instrument' | 'videomic-me-c' | 'monitor-clip'
 
 function InstrumentStandWorkspace() {
   const [parameters, setParameters] = useState<StandParameters>(defaultParameters)
@@ -51,7 +58,14 @@ function InstrumentStandWorkspace() {
           rearBeamChamber={dimensions.rearBeamChamber}
           onChange={setParameters}
         />
-        <SettingsPanel parameters={settingsParameters} onImport={setParameters} />
+        <SettingsPanel
+          parameters={settingsParameters}
+          filename="flex-stand-settings.json"
+          note="形状・格子・梁・プリンタ設定をまとめて保存"
+          serialize={serializeSettings}
+          parse={parseSettings}
+          onImport={setParameters}
+        />
       </aside>
 
       <section className="stage">
@@ -78,6 +92,54 @@ function InstrumentStandWorkspace() {
               <button className="primary" disabled={hasErrors} onClick={() => downloadAssembly3mf(dimensions)}>一式 3MF</button>
             </div>
             <p>脚は同じSTLを2個、前梁・後梁は各1個を印刷</p>
+          </div>
+        </div>
+      </section>
+    </div>
+  )
+}
+
+function MonitorClipWorkspace() {
+  const [parameters, setParameters] = useState<ClipParameters>(defaultClipParameters)
+  const validation = useMemo(() => validateClip(parameters), [parameters])
+  const hasErrors = validation.some((item) => item.level === 'error')
+  const parts = useMemo(() => hasErrors ? [] : createMonitorClipPreview(parameters), [hasErrors, parameters])
+
+  return (
+    <div className="workspace">
+      <aside className="sidebar">
+        <ClipControls parameters={parameters} onChange={setParameters} />
+        <SettingsPanel
+          parameters={parameters}
+          filename="monitor-clip-settings.json"
+          note="保持部・土台・プリンタ設定をまとめて保存"
+          serialize={serializeClipSettings}
+          parse={parseClipSettings}
+          onImport={setParameters}
+        />
+      </aside>
+
+      <section className="stage">
+        <div className="preview-card">
+          <Preview parts={parts} framing="clip" />
+          <div className="view-hint">ドラッグで回転 · スクロールで拡大</div>
+        </div>
+
+        <div className="readout-grid">
+          <div className="readout"><span>クリップ内寸</span><strong>{clipOpening(parameters).toFixed(1)}<small> mm</small></strong></div>
+          <div className="readout"><span>中央盛り上げ</span><strong>{parameters.clipBridgeHeight.toFixed(1)}<small> mm</small></strong></div>
+          <div className="readout"><span>土台奥行</span><strong>{parameters.baseDepth.toFixed(0)}<small> mm</small></strong></div>
+          <div className="readout"><span>壁厚 上端 / 根元</span><strong>{parameters.wallThickness.toFixed(1)} / {clipWallBaseThickness(parameters).toFixed(1)}<small> mm</small></strong></div>
+        </div>
+
+        <div className="bottom-row">
+          <ValidationCard validation={validation} />
+          <div className="export-card">
+            <h2>モデル出力</h2>
+            <div className="export-actions">
+              <button className="primary" disabled={hasErrors} onClick={() => downloadMonitorClip(parameters)}>クリップ STL</button>
+            </div>
+            <p>同じSTLを2個印刷。内側に約1mmのTPUかフェルト、底面にゴムを貼る</p>
           </div>
         </div>
       </section>
@@ -148,6 +210,7 @@ function ValidationCard({ validation }: { validation: Array<{ level: 'error' | '
 export function App() {
   const [product, setProduct] = useState<ProductMode>('videomic-me-c')
   const microphone = product === 'videomic-me-c'
+  const monitorClip = product === 'monitor-clip'
 
   return (
     <main>
@@ -156,15 +219,16 @@ export function App() {
           <p className="eyebrow">PARAMETRIC DESK HARDWARE</p>
           <h1>Flex Stand</h1>
         </div>
-        <p className="header-note">{microphone ? '三脚ベース · 325mm一体支柱 · Me-Cホルダー' : '脚 × 2 · 梁 × 2'}</p>
+        <p className="header-note">{microphone ? '三脚ベース · 325mm一体支柱 · Me-Cホルダー' : monitorClip ? '同じクリップを2個印刷' : '脚 × 2 · 梁 × 2'}</p>
       </header>
 
       <nav className="product-tabs" aria-label="製品モード">
         <button className={microphone ? 'active' : ''} onClick={() => setProduct('videomic-me-c')}>VideoMic Me-C</button>
-        <button className={!microphone ? 'active' : ''} onClick={() => setProduct('instrument')}>楽器スタンド</button>
+        <button className={product === 'instrument' ? 'active' : ''} onClick={() => setProduct('instrument')}>楽器スタンド</button>
+        <button className={monitorClip ? 'active' : ''} onClick={() => setProduct('monitor-clip')}>モニタークリップ</button>
       </nav>
 
-      {microphone ? <MicrophoneStandWorkspace /> : <InstrumentStandWorkspace />}
+      {microphone ? <MicrophoneStandWorkspace /> : monitorClip ? <MonitorClipWorkspace /> : <InstrumentStandWorkspace />}
     </main>
   )
 }

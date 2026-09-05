@@ -1,6 +1,6 @@
 import { geometries } from '@jscad/modeling'
 import { BufferGeometry, Float32BufferAttribute } from 'three'
-import type { JscadGeometry } from './model'
+import type { JscadGeometry } from './types'
 
 export function toThreeGeometry(source: JscadGeometry): BufferGeometry {
   const positions: number[] = []
