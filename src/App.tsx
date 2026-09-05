@@ -60,7 +60,7 @@ function InstrumentStandWorkspace() {
         />
         <SettingsPanel
           parameters={settingsParameters}
-          filename="flex-stand-settings.json"
+          filename="instrument-stand-settings.json"
           note="形状・格子・梁・プリンタ設定をまとめて保存"
           serialize={serializeSettings}
           parse={parseSettings}
@@ -216,8 +216,8 @@ export function App() {
     <main>
       <header className="app-header">
         <div>
-          <p className="eyebrow">PARAMETRIC DESK HARDWARE</p>
-          <h1>Flex Stand</h1>
+          <p className="eyebrow">PARAMETRIC 3D MODELS</p>
+          <h1>Models</h1>
         </div>
         <p className="header-note">{microphone ? '三脚ベース · 325mm一体支柱 · Me-Cホルダー' : monitorClip ? '同じクリップを2個印刷' : '脚 × 2 · 梁 × 2'}</p>
       </header>
