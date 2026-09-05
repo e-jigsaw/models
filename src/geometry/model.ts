@@ -102,6 +102,7 @@ export type AssemblyPart = {
   id: string
   color: string
   geometry: JscadGeometry
+  printable?: boolean
 }
 
 export function createAssembly(d: DerivedDimensions): AssemblyPart[] {
