@@ -1,7 +1,18 @@
 import threeMfSerializer from '@jscad/3mf-serializer'
 import stlSerializer from '@jscad/stl-serializer'
+import { measurements, transforms } from '@jscad/modeling'
 import type { DerivedDimensions } from '../domain/derive'
 import { createAssembly, createBeam, createLeg, type JscadGeometry } from '../geometry/model'
+import type { MicrophoneStandDimensions } from '../microphone/derive'
+import {
+  createMicrophoneAssembly,
+  createMicrophoneBase,
+  createMicrophoneHolder,
+  createMicrophoneMast,
+} from '../microphone/model'
+
+const { measureBoundingBox } = measurements
+const { translate } = transforms
 
 function download(parts: BlobPart[], type: string, filename: string) {
   const url = URL.createObjectURL(new Blob(parts, { type }))
@@ -35,4 +46,29 @@ export function downloadAssembly3mf(d: DerivedDimensions) {
   const geometries = createAssembly(d).map((part) => part.geometry)
   const data = threeMfSerializer.serialize({ unit: 'millimeter', compress: true }, ...geometries) as BlobPart[]
   download(data, 'model/3mf', 'flex-stand.3mf')
+}
+
+function moveToOrigin(geometry: JscadGeometry): JscadGeometry {
+  const [minimum] = measureBoundingBox(geometry)
+  return translate([-minimum[0], -minimum[1], -minimum[2]], geometry) as JscadGeometry
+}
+
+export function downloadMicrophoneBase(d: MicrophoneStandDimensions) {
+  downloadStl(moveToOrigin(createMicrophoneBase(d)), 'videomic-me-c-base.stl')
+}
+
+export function downloadMicrophoneMast(d: MicrophoneStandDimensions) {
+  downloadStl(moveToOrigin(createMicrophoneMast(d)), 'videomic-me-c-mast.stl')
+}
+
+export function downloadMicrophoneHolder(d: MicrophoneStandDimensions) {
+  downloadStl(moveToOrigin(createMicrophoneHolder(d)), 'videomic-me-c-holder.stl')
+}
+
+export function downloadMicrophoneAssembly3mf(d: MicrophoneStandDimensions) {
+  const geometries = createMicrophoneAssembly(d)
+    .filter((part) => part.printable !== false)
+    .map((part) => part.geometry)
+  const data = threeMfSerializer.serialize({ unit: 'millimeter', compress: true }, ...geometries) as BlobPart[]
+  download(data, 'model/3mf', 'videomic-me-c-stand.3mf')
 }

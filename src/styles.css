@@ -17,6 +17,9 @@ main { min-height: 100vh; padding: 28px; }
 .eyebrow { margin: 0 0 3px; color: #a0a492; font: 500 11px/1.2 'DM Mono', monospace; letter-spacing: .14em; }
 h1 { margin: 0; font-size: clamp(30px, 4vw, 48px); line-height: 1; letter-spacing: -.055em; }
 .header-note { margin: 0; color: #a0a492; font: 12px 'DM Mono', monospace; }
+.product-tabs { max-width: 1480px; margin: -4px auto 16px; display: flex; gap: 7px; }
+.product-tabs button { color: #aeb29f; }
+.product-tabs button.active { border-color: #d9ff57; color: #171910; background: #d9ff57; font-weight: 700; }
 
 .workspace { max-width: 1480px; margin: auto; display: grid; grid-template-columns: 310px 1fr; gap: 18px; }
 .sidebar, .preview-card, .validation-card, .export-card, .readout { border: 1px solid #35382e; background: #1c1e19; }
@@ -71,6 +74,7 @@ h2 { margin: 0 0 15px; color: #bec1b3; font: 500 11px 'DM Mono', monospace; lett
 .validation-card .error { color: #ff8c74; }
 .valid { margin: 0; color: #d9ff57; font-size: 12px; }
 .export-actions { display: flex; gap: 7px; }
+.export-actions.wrap { flex-wrap: wrap; }
 button { border: 1px solid #42463a; border-radius: 8px; background: #292c24; color: #e9eadf; padding: 8px 12px; cursor: pointer; transition: transform .15s, border-color .15s; }
 button:hover:not(:disabled) { transform: translateY(-1px); border-color: #7e846d; }
 button.primary { border-color: #d9ff57; background: #d9ff57; color: #171910; font-weight: 700; }
