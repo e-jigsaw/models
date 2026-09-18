@@ -61,6 +61,9 @@ h2 { margin: 0 0 15px; color: #bec1b3; font: 500 11px 'DM Mono', monospace; lett
 .stage { min-width: 0; display: grid; gap: 14px; }
 .preview-card { min-height: 510px; height: calc(100vh - 316px); position: relative; overflow: hidden; border-radius: 18px; }
 .view-hint { position: absolute; right: 14px; bottom: 12px; border: 1px solid #3c4034; border-radius: 99px; padding: 7px 10px; background: #171813cc; color: #919581; font: 10px 'DM Mono', monospace; pointer-events: none; }
+.keycap-view-toggle { position: absolute; top: 12px; left: 12px; display: flex; gap: 5px; }
+.keycap-view-toggle button { padding: 6px 9px; background: #171813dd; font: 10px 'DM Mono', monospace; }
+.keycap-view-toggle button.active { border-color: #d9ff57; color: #d9ff57; }
 .readout-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
 .readout { min-width: 0; border-radius: 11px; padding: 12px 14px; }
 .readout span { display: block; margin-bottom: 4px; color: #8e927f; font-size: 11px; }

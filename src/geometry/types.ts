@@ -7,4 +7,5 @@ export type AssemblyPart = {
   color: string
   geometry: JscadGeometry
   printable?: boolean
+  previewLift?: number
 }
