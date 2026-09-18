@@ -4,6 +4,9 @@
 
 現在収録しているモデル:
 
+- 3-Key Switch Tester: 横一列の3穴、底なし・基板なしの枠。外形62×24×12mm、19.05mmピッチ、穴14.1mm、天板1.5mm、側壁2mmが既定。
+  - 穴幅・全高・側壁厚を調整でき、STL/3MFは天板を下にした印刷向きで出力。
+  - 穴と天板厚の基準は[CHERRY MX寸法図](https://www.smcelectronics.com/DOWNLOADS/CHERRYMX.PDF)の14mm角・1.5mm厚。既定穴には幅全体で+0.1mmの印刷補正を追加。ユーザーの実物確認でスイッチがぴったり嵌合。
 - Instrument Stand: 脚と梁を生成
 - VideoMic Me-C Stand: 3点接地ベース、325mm一体支柱、USB-C開口付きホルダーを生成
 - Cherry Keycap: R1〜R4、MX互換ステム、2色の角丸菱形インレイを生成

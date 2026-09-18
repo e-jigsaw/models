@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { SwitchTesterWorkspace } from './components/SwitchTesterWorkspace'
 import { clipWallBaseThickness, createMonitorClipPreview } from './clip/model'
 import { clipOpening, defaultClipParameters, type ClipParameters } from './clip/parameters'
 import { parseClipSettings, serializeClipSettings } from './clip/preset'
@@ -40,7 +41,7 @@ import { defaultKeycapParameters, type KeycapParameters } from './keycap/paramet
 import { parseKeycapSettings, serializeKeycapSettings } from './keycap/preset'
 import { validateKeycap } from './keycap/validate'
 
-type ProductMode = 'instrument' | 'videomic-me-c' | 'monitor-clip' | 'cherry-keycap'
+type ProductMode = 'instrument' | 'videomic-me-c' | 'monitor-clip' | 'cherry-keycap' | 'switch-tester'
 
 function InstrumentStandWorkspace() {
   const [parameters, setParameters] = useState<StandParameters>(defaultParameters)
@@ -278,6 +279,7 @@ export function App() {
   const microphone = product === 'videomic-me-c'
   const monitorClip = product === 'monitor-clip'
   const keycap = product === 'cherry-keycap'
+  const tester = product === 'switch-tester'
 
   return (
     <main>
@@ -286,7 +288,7 @@ export function App() {
           <p className="eyebrow">PARAMETRIC 3D MODELS</p>
           <h1>Models</h1>
         </div>
-        <p className="header-note">{microphone ? '三脚ベース · 325mm一体支柱 · Me-Cホルダー' : monitorClip ? '同じクリップを2個印刷' : keycap ? 'Cherry 1U · MX stem · 2色 inlay' : '脚 × 2 · 梁 × 2'}</p>
+        <p className="header-note">{tester ? '3キー横一列 · 底なしの枠' : microphone ? '三脚ベース · 325mm一体支柱 · Me-Cホルダー' : monitorClip ? '同じクリップを2個印刷' : keycap ? 'Cherry 1U · MX stem · 2色 inlay' : '脚 × 2 · 梁 × 2'}</p>
       </header>
 
       <nav className="product-tabs" aria-label="製品モード">
@@ -294,9 +296,10 @@ export function App() {
         <button className={product === 'instrument' ? 'active' : ''} onClick={() => setProduct('instrument')}>楽器スタンド</button>
         <button className={monitorClip ? 'active' : ''} onClick={() => setProduct('monitor-clip')}>モニタークリップ</button>
         <button className={keycap ? 'active' : ''} onClick={() => setProduct('cherry-keycap')}>Cherryキーキャップ</button>
+        <button className={tester ? 'active' : ''} onClick={() => setProduct('switch-tester')}>3キーテスター</button>
       </nav>
 
-      {microphone ? <MicrophoneStandWorkspace /> : monitorClip ? <MonitorClipWorkspace /> : keycap ? <KeycapWorkspace /> : <InstrumentStandWorkspace />}
+      {tester ? <SwitchTesterWorkspace /> : microphone ? <MicrophoneStandWorkspace /> : monitorClip ? <MonitorClipWorkspace /> : keycap ? <KeycapWorkspace /> : <InstrumentStandWorkspace />}
     </main>
   )
 }

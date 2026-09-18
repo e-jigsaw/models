@@ -1,4 +1,5 @@
 import threeMfSerializer from '@jscad/3mf-serializer'
+import { createTesterAssembly, type TesterParameters } from '../switchTester/model'
 import stlSerializer from '@jscad/stl-serializer'
 import { measurements, transforms } from '@jscad/modeling'
 import { strToU8, zipSync } from 'fflate'
@@ -34,6 +35,10 @@ function download(parts: BlobPart[], type: string, filename: string) {
 export function downloadStl(geometry: JscadGeometry, filename: string) {
   const data = stlSerializer.serialize({ binary: true }, geometry) as BlobPart[]
   download(data, 'model/stl', filename)
+}
+
+export function downloadTester3mf(parameters: TesterParameters) {
+  download(serializeBambuAssembly3mf(createTesterAssembly(parameters, true), 'three-key-switch-tester'), 'model/3mf', 'three-key-switch-tester.3mf')
 }
 
 export function downloadLeg(d: DerivedDimensions) {

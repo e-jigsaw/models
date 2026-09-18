@@ -28,18 +28,19 @@ export function Preview({
   underside = false,
 }: {
   parts: AssemblyPart[]
-  framing?: 'instrument' | 'microphone' | 'clip' | 'keycap'
+  framing?: 'instrument' | 'microphone' | 'clip' | 'keycap' | 'tester'
   underside?: boolean
 }) {
   const microphone = framing === 'microphone'
   const clip = framing === 'clip'
   const keycap = framing === 'keycap'
+  const tester = framing === 'tester'
   return (
     <Canvas
       key={`${framing}-${underside ? 'underside' : 'top'}`}
       shadows
       camera={{
-        position: microphone ? [420, 300, 430] : clip ? [155, 115, 165] : keycap ? (underside ? [0, -45, 0.1] : [35, 28, 38]) : [340, 260, 420],
+        position: tester ? [65, 65, 90] : microphone ? [420, 300, 430] : clip ? [155, 115, 165] : keycap ? (underside ? [0, -45, 0.1] : [35, 28, 38]) : [340, 260, 420],
         fov: 38,
         near: 0.1,
         far: 3000,
@@ -57,7 +58,7 @@ export function Preview({
       />
       {underside && <directionalLight position={[90, -140, 70]} intensity={3.2} />}
       <Suspense fallback={null}>
-        <group position={microphone || clip || keycap ? [0, 0, 0] : [-95, 0, 0]}>
+        <group position={microphone || clip || keycap || tester ? [0, 0, 0] : [-95, 0, 0]}>
           {parts.map((part) => <Part key={part.id} part={part} />)}
         </group>
         {!underside && <ContactShadows position={[0, -0.5, 0]} opacity={0.45} scale={800} blur={2.5} far={400} />}
@@ -78,8 +79,8 @@ export function Preview({
       )}
       <OrbitControls
         makeDefault
-        target={microphone ? [0, 170, 0] : clip ? [0, 16, 0] : keycap ? (underside ? [0, 2.5, 0] : [0, 5, 0]) : [20, 45, 0]}
-        minDistance={keycap ? 18 : clip ? 90 : 160}
+        target={tester ? [0, 5, 0] : microphone ? [0, 170, 0] : clip ? [0, 16, 0] : keycap ? (underside ? [0, 2.5, 0] : [0, 5, 0]) : [20, 45, 0]}
+        minDistance={tester ? 45 : keycap ? 18 : clip ? 90 : 160}
         maxDistance={keycap ? 180 : clip ? 500 : 1100}
       />
     </Canvas>
