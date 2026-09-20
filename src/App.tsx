@@ -1,10 +1,12 @@
 import { useMemo, useState } from 'react'
+import { SwitchTesterWorkspace } from './components/SwitchTesterWorkspace'
 import { clipWallBaseThickness, createMonitorClipPreview } from './clip/model'
 import { clipOpening, defaultClipParameters, type ClipParameters } from './clip/parameters'
 import { parseClipSettings, serializeClipSettings } from './clip/preset'
 import { validateClip } from './clip/validate'
 import { ClipControls } from './components/ClipControls'
 import { Controls } from './components/Controls'
+import { KeycapControls } from './components/KeycapControls'
 import { MicrophoneControls } from './components/MicrophoneControls'
 import { MicrophoneSettingsPanel } from './components/MicrophoneSettingsPanel'
 import { Preview } from './components/Preview'
@@ -22,6 +24,8 @@ import {
   downloadMicrophoneMast,
   downloadMonitorClip,
   downloadRearBeam,
+  downloadKeycap3mf,
+  downloadKeycapPart,
 } from './export/download'
 import { createAssembly } from './geometry/model'
 import { deriveMicrophoneStand } from './microphone/derive'
@@ -32,8 +36,12 @@ import {
 } from './microphone/parameters'
 import { validateMicrophoneStand } from './microphone/validate'
 import { parseSettings, serializeSettings } from './settings/preset'
+import { createKeycapAssembly, createKeycapUndersidePreview, keycapBounds } from './keycap/model'
+import { defaultKeycapParameters, type KeycapParameters } from './keycap/parameters'
+import { parseKeycapSettings, serializeKeycapSettings } from './keycap/preset'
+import { validateKeycap } from './keycap/validate'
 
-type ProductMode = 'instrument' | 'videomic-me-c' | 'monitor-clip'
+type ProductMode = 'instrument' | 'videomic-me-c' | 'monitor-clip' | 'cherry-keycap' | 'switch-tester'
 
 function InstrumentStandWorkspace() {
   const [parameters, setParameters] = useState<StandParameters>(defaultParameters)
@@ -192,6 +200,65 @@ function MicrophoneStandWorkspace() {
   )
 }
 
+function KeycapWorkspace() {
+  const [parameters, setParameters] = useState<KeycapParameters>(defaultKeycapParameters)
+  const [underside, setUnderside] = useState(false)
+  const validation = useMemo(() => validateKeycap(parameters), [parameters])
+  const hasErrors = validation.some((item) => item.level === 'error')
+  const parts = useMemo(
+    () => hasErrors ? [] : underside ? createKeycapUndersidePreview(parameters) : createKeycapAssembly(parameters),
+    [hasErrors, parameters, underside],
+  )
+  const bounds = useMemo(() => hasErrors ? null : keycapBounds(parameters), [hasErrors, parameters])
+
+  return (
+    <div className="workspace">
+      <aside className="sidebar">
+        <KeycapControls parameters={parameters} onChange={setParameters} />
+        <SettingsPanel
+          parameters={parameters}
+          filename="cherry-keycap-settings.json"
+          note="row・壁厚・MX嵌合・インレイ設定を保存"
+          serialize={serializeKeycapSettings}
+          parse={parseKeycapSettings}
+          onImport={setParameters}
+        />
+      </aside>
+
+      <section className="stage">
+        <div className="preview-card">
+          <Preview parts={parts} framing="keycap" underside={underside} />
+          <div className="keycap-view-toggle" aria-label="キーキャップ表示面">
+            <button className={!underside ? 'active' : ''} onClick={() => setUnderside(false)}>天面</button>
+            <button className={underside ? 'active' : ''} onClick={() => setUnderside(true)}>底面・MXステム</button>
+          </div>
+          <div className="view-hint">{underside ? `黄緑: ${parameters.stemShape === 'box' ? '角形' : '丸形'}MXステム · 根元のT字3点リブ` : '本体 · 青い角丸菱形'}</div>
+        </div>
+
+        <div className="readout-grid">
+          <div className="readout"><span>Profile</span><strong>R{parameters.row}</strong></div>
+          <div className="readout"><span>外形</span><strong>{bounds?.width.toFixed(2) ?? '—'} × {bounds?.depth.toFixed(2) ?? '—'}<small> mm</small></strong></div>
+          <div className="readout"><span>全高</span><strong>{bounds?.height.toFixed(2) ?? '—'}<small> mm</small></strong></div>
+          <div className="readout"><span>色数</span><strong>2</strong></div>
+        </div>
+
+        <div className="bottom-row">
+          <ValidationCard validation={validation} />
+          <div className="export-card">
+            <h2>モデル出力</h2>
+            <div className="export-actions wrap">
+              <button disabled={hasErrors} onClick={() => downloadKeycapPart(parameters, 'keycap-body')}>本体 STL</button>
+              <button disabled={hasErrors} onClick={() => downloadKeycapPart(parameters, 'top-accent')}>菱形 STL</button>
+              <button className="primary" disabled={hasErrors} onClick={() => downloadKeycap3mf(parameters)}>2色 3MF</button>
+            </div>
+            <p>3MFを1オブジェクトとして読み込み、2パーツへフィラメントを割り当てる</p>
+          </div>
+        </div>
+      </section>
+    </div>
+  )
+}
+
 function ValidationCard({ validation }: { validation: Array<{ level: 'error' | 'warning'; message: string }> }) {
   return (
     <div className="validation-card">
@@ -211,6 +278,8 @@ export function App() {
   const [product, setProduct] = useState<ProductMode>('videomic-me-c')
   const microphone = product === 'videomic-me-c'
   const monitorClip = product === 'monitor-clip'
+  const keycap = product === 'cherry-keycap'
+  const tester = product === 'switch-tester'
 
   return (
     <main>
@@ -219,16 +288,18 @@ export function App() {
           <p className="eyebrow">PARAMETRIC 3D MODELS</p>
           <h1>Models</h1>
         </div>
-        <p className="header-note">{microphone ? '三脚ベース · 325mm一体支柱 · Me-Cホルダー' : monitorClip ? '同じクリップを2個印刷' : '脚 × 2 · 梁 × 2'}</p>
+        <p className="header-note">{tester ? '3キー横一列 · 底なしの枠' : microphone ? '三脚ベース · 325mm一体支柱 · Me-Cホルダー' : monitorClip ? '同じクリップを2個印刷' : keycap ? 'Cherry 1U · MX stem · 2色 inlay' : '脚 × 2 · 梁 × 2'}</p>
       </header>
 
       <nav className="product-tabs" aria-label="製品モード">
         <button className={microphone ? 'active' : ''} onClick={() => setProduct('videomic-me-c')}>VideoMic Me-C</button>
         <button className={product === 'instrument' ? 'active' : ''} onClick={() => setProduct('instrument')}>楽器スタンド</button>
         <button className={monitorClip ? 'active' : ''} onClick={() => setProduct('monitor-clip')}>モニタークリップ</button>
+        <button className={keycap ? 'active' : ''} onClick={() => setProduct('cherry-keycap')}>Cherryキーキャップ</button>
+        <button className={tester ? 'active' : ''} onClick={() => setProduct('switch-tester')}>3キーテスター</button>
       </nav>
 
-      {microphone ? <MicrophoneStandWorkspace /> : monitorClip ? <MonitorClipWorkspace /> : <InstrumentStandWorkspace />}
+      {tester ? <SwitchTesterWorkspace /> : microphone ? <MicrophoneStandWorkspace /> : monitorClip ? <MonitorClipWorkspace /> : keycap ? <KeycapWorkspace /> : <InstrumentStandWorkspace />}
     </main>
   )
 }

@@ -23,6 +23,9 @@ importers:
       '@react-three/fiber':
         specifier: ^9.3.0
         version: 9.6.1(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(three@0.179.1)
+      fflate:
+        specifier: ^0.8.3
+        version: 0.8.3
       react:
         specifier: ^19.1.1
         version: 19.2.8
